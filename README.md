@@ -1,2 +1,2 @@
 # AutomacaoMapas
-Projeto de automatição da produção de mapas com diversos tipos de dados
+Projeto de automatização da produção de mapas com diversos tipos de dados
