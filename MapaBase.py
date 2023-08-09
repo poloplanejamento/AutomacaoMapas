@@ -1,4 +1,4 @@
-
+#%%
 """"
 #esta parte do código é de instalação de pacotes, 
 #permitem chamar funções específicas para além das básicas de python
@@ -11,6 +11,7 @@ pip install geobr
 pip install matplotlib
 pip install matplotlib.scalebar
 pip install contextily
+pip install ipympl
 
 """
 
@@ -21,6 +22,7 @@ import pandas as pd
 import geopandas as gpd
 import geobr
 import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable #da escala
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, TransformedBbox #da escala
 from matplotlib_scalebar.scalebar import ScaleBar #da escala
