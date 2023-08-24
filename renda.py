@@ -50,43 +50,52 @@ dados.plot()
 #  !zip -r /content/drive/MyDrive/Exportados.zip /content/drive/MyDrive/Exportados
 
 
-#Código atualizado em 22/08/23
+#Código atualizado em 24/08/23
 
-cidade = "CERQUILHO"
+cidade = "cerquilho"      #coloque com acento se houver
+cidade = cidade.upper()   #transforma em letras maiusculas
 
-fig, ax = plt.subplots(figsize=(8,8))
+fig,ax= plt.subplots()    #cria uma plotagem
 
-ax = sp.plot(ax=ax, color='grey', zorder=0)
+lim_ext= sp[sp.NM_MUNICIP == cidade]              #coloca um fundo branco no município
+lim_ext.plot (zorder= 1, color= 'white', ax=ax,)  #define a ordem e carcteristicas desse fundo
 
-selec= dados[dados.NM_MUNICIP == cidade]
-selec.plot(column="V005", ax=ax, scheme="natural_breaks", k=5, cmap="OrRd", edgecolor='#eeeeee', legend=True, legend_kwds={
-  'loc': "lower right",
-  "title": "Rendimento Nominal\nmédio mensal",
-  "fontsize":"xx-small",
-  "title_fontsize":"x-small" })
-#column é a coluna selecionada da tabela (no caso, renda)
-#ax=ax é a posição do plot (preciso entender melhor)
-#scheme é a simbologia por categorização (quantiles, equal_interval, natural_breaks)
-#k é o número de classes da categorização
-#cmap é a definição das cores do mapa. (https://matplotlib.org/stable/gallery/index.html#color)
-#edgecolor é definição de cor da borda das feições. Para retirar as bordas, usar edgecolor='nome'
-#legend é a opção para inserir ou não a legenda
+cidade_setores= dados[dados.NM_MUNICIP == cidade]          #seleciona todos os setores censitários que têm essa cidade no nome 
+cidade_setores.plot(column="V005", ax=ax, scheme="natural_breaks", k=5, cmap="RdYlBu", alpha=0.7 , edgecolor='white', linewidth=0.1, legend=True, legend_kwds={
+      'loc': "lower right",
+      "title": "Rendimento Nominal\nmédio mensal",
+      "fontsize":"xx-small",
+      "title_fontsize":"x-small"
+      })
 
-ax.set_box_aspect(0.4067)
-pos1 = ax.get_position()
-ax.set_position(pos1)
-#ax.set_box_aspect determina a proporção da area de impressão
+      #column é a coluna selecionada da tabela (no caso, renda)
+      #ax=ax é a posição do plot (preciso entender melhor)
+      #scheme é a simbologia por categorização (quantiles, equal_interval, natural_breaks)
+      #k é o número de classes da categorização
+      #cmap é a definição das cores do mapa. (https://matplotlib.org/stable/gallery/index.html#color)
+      #edgecolor é definição de cor da borda das feições. Para retirar as bordas, usar edgecolor='nome'
+      #legend é a opção para inserir ou não a legenda
 
-minx, miny, maxx, maxy = selec.geometry.total_bounds
-ax.set_xlim(minx - 100, maxx + 100) # added/substracted value is to give some margin around total bounds
+lim_ext.plot(ax=ax, zorder= 3, color='none', edgecolor= 'gray', linewidth=1.5)           #plota uma camada com a borda do municio
+ax = sp.plot(ax=ax, color='lightgrey',zorder=0, linewidth=0.6, edgecolor='white')        #plota uma camada com as outras cidades do estado
+
+ax.set_box_aspect(0.5)                                   #define a proporção do frame (mapa)
+minx, miny, maxx, maxy = cidade_setores.geometry.total_bounds        #pega a proporção da camada só com os setores e ajusta
+
+ax.set_xlim(minx - .02, maxx + .08)                         #ajusta posição de plot
 ax.set_ylim(miny - 400, maxy + 400)
 
-titulo = "Mapa de renda de " + cidade
-plt.title (titulo.title(), fontsize=12, loc='center',color='#4d4d4d')
-plt.xlabel("Longitude", color='#4d4d4d')
-plt.ylabel("Latitude", color='#4d4d4d')
-plt.xticks(color='#4d4d4d')
-plt.yticks(color='#4d4d4d')
+                           
+
+#título
+titulo = "Mapa de renda de " + cidade                                 
+plt.title (titulo.title(), fontsize=10, loc='center',color='#4d4d4d')
+
+#definindo os eixos
+plt.xlabel("Longitude", color='#4d4d4d',fontsize=8)
+plt.ylabel("Latitude", color='#4d4d4d',fontsize=8)
+plt.xticks(color='#4d4d4d', fontsize=6)
+plt.yticks(color='#4d4d4d', fontsize=6)
 
 
 fig.tight_layout()
