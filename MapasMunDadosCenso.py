@@ -12,6 +12,8 @@ from matplotlib import font_manager
 from mpl_toolkits.axes_grid1 import make_axes_locatable #da escala
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, TransformedBbox #da escala
 from matplotlib_scalebar.scalebar import ScaleBar #da escala
+from sqlalchemy import true                         #
+from pandas.core.reshape.tile import Categorical    #categorização ao inves de classificação
 
 ## caso ambiente seja colab, conecta este ambiente automaticamente com a conta do google (deve ter login da Polo@gmail para funcionar)
 #from google.colab import drive
@@ -58,14 +60,29 @@ br=br.to_crs(epsg=31983)
 tabela_setores = tabela_setores[["Cod_setor", "V001","V002","V005"]]
 tabela_setores['dens_hab'] = tabela_setores['V002'] / tabela_setores['V001']
 
-#verificação do tipo da variável
+#construindo situação Rural ou Urbana
+
+tabela_setores['Situacao_urb'] = ''
+#tabela_setores.insert(column= "Situacao_urb")
+
+# Classificando entre rural e urbano
+for i, row in tabela_setores.iterrows():
+    if row['Situacao_setor'] < 4:
+      tabela_setores.loc[i,'Situacao_urb'] = "Urbano"
+    else:
+      tabela_setores.loc[i,'Situacao_urb'] = "Rural"
+
+
+#verificação do tipo da variável 
 tabela_setores.Cod_setor.dtype
 shape_setores.CD_GEOCODI.dtype
+
 #tranformação da coluna do shape setores que contem os codigos unitários para números inteiros
 shape_setores.CD_GEOCODI= shape_setores.CD_GEOCODI.astype(int)
 #mescla da tabela com shape
 dados= shape_setores.merge(tabela_setores, left_on="CD_GEOCODI", right_on="Cod_setor")
 
+#definição de variáveis em acordo com tipo de MAPA pretendido
 if parametro_censo == "RENDA":
     variavel_censo = "V005"
     titulo_mapa = "Rendimento Nominal\médio mensal"
@@ -78,27 +95,31 @@ elif parametro_censo == "RAÇA":
     variavel_censo = "dens_hab"
     titulo_mapa = "Densidade Habitacional"
     cor_mapa = "Oranges"
+elif parametro_censo == "SITUAÇÃO URBANA":
+    variavel_censo = "Situacao_urb"
+    titulo_mapa = "Situação Urbana"
+    cor_mapa = "Wistia"
 else:
     print("Variavel não válida ou ainda não atendida.")
 
 
-#tentativa mudança de fonte, não funcionou no ambiente colab
-matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
-plt.rcParams['font.family']
-matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
 
-font_dirs = ['/content/drive/MyDrive/Fonte/']
-font_files = font_manager.findSystemFonts (fontpaths = font_dirs)
+##tentativa mudança de fonte, não funcionou no ambiente colab
+#matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
+#plt.rcParams['font.family']
+#matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
 
-for font_file in font_files:
-    font_manager.fontManager.addfont(font_file)
+#font_dirs = ['/content/drive/MyDrive/Fonte/']
+#font_files = font_manager.findSystemFonts (fontpaths = font_dirs)
 
-# set font
-plt.rcParams['font.family'] = 'Jost-Regular'
+#for font_file in font_files:
+#    font_manager.fontManager.addfont(font_file)
+
+## set font
+#plt.rcParams['font.family'] = 'Jost-Regular'
 
 
 #Plotagem do mapa
-
 cidade2 = cidade.upper()   ###########consertar
 cidade1 = cidade.title()
 
@@ -106,23 +127,32 @@ fig,ax = plt.subplots()    #cria uma plotagem
 
 lim_ext = shape_estado_mun[shape_estado_mun.NM_MUN == cidade1]              #coloca um fundo branco no município
 lim_ext.plot(zorder=3, color= 'white', ax=ax)  #define a ordem e carcteristicas desse fundo
-
 cidade_setores= dados[dados.NM_MUNICIP == cidade2]          #seleciona todos os setores censitários que têm essa cidade no nome
-cidade_setores.plot(zorder=4,column= variavel_censo, ax=ax, scheme="natural_breaks", k=5, cmap= cor_mapa, alpha=0.8 , edgecolor='white', linewidth=0.1, legend=True, legend_kwds={
-      'loc': "lower right",
-      "title": titulo_mapa,
-      "fontsize":"xx-small",
-      "labelcolor":'#4d4d4d',
-      "title_fontsize": "x-small"
-      })
-#column é a coluna selecionada da tabela (no caso, renda)
-#ax=ax é a posição do plot (preciso entender melhor)
-#scheme é a simbologia por categorização (quantiles, equal_interval, natural_breaks)
-#k é o número de classes da categorização
-#cmap é a definição das cores do mapa. (https://matplotlib.org/stable/gallery/index.html#color)
-#edgecolor é definição de cor da borda das feições. Para retirar as bordas, usar edgecolor='nome'
-#legend é a opção para inserir ou não a legenda
 
+if titulo_mapa == "Situação Urbana": #mapa categorizado
+    cidade_setores.plot(zorder=4,column= variavel_censo, ax=ax, categorical=True, cmap= cor_mapa, alpha=0.6 , edgecolor='white', linewidth=0.1, legend=True, legend_kwds={
+        'loc': "lower right",
+        "title": titulo_mapa,
+        "fontsize":"xx-small",
+        "labelcolor":'#4d4d4d',
+        "title_fontsize": "x-small"
+        })
+else: #mapa classificado
+    cidade_setores.plot(zorder=4,column= variavel_censo, ax=ax, scheme="natural_breaks", k=5, cmap= cor_mapa, alpha=0.8 , edgecolor='white', linewidth=0.1, legend=True, legend_kwds={
+          'loc': "lower right",
+          "title": titulo_mapa,
+          "fontsize":"xx-small",
+          "labelcolor":'#4d4d4d',
+          "title_fontsize": "x-small"
+          })
+
+    #column é a coluna selecionada da tabela (no caso, renda)
+    #ax=ax é a posição do plot (preciso entender melhor)
+    #scheme é a simbologia por categorização (quantiles, equal_interval, natural_breaks)
+    #k é o número de classes da categorização
+    #cmap é a definição das cores do mapa. (https://matplotlib.org/stable/gallery/index.html#color)
+    #edgecolor é definição de cor da borda das feições. Para retirar as bordas, usar edgecolor='nome'
+    #legend é a opção para inserir ou não a legenda
 
 ax = oceano.plot(ax=ax, color='#dee6ef',zorder=0, linewidth=0.6, edgecolor='white')
 ax = br.plot(ax=ax, color='#f1f1f1',zorder=1, linewidth=0.6, edgecolor='#b7b7b7')
@@ -163,11 +193,12 @@ ax.add_artist(ScaleBar(dx=1, box_color= 'none',color = '#7a7a7a', location='lowe
 #gdf = gpd.read_file(gpd.datasets.get_path('nybb'))
 #gdf.plot(ax=ax)
 
-x, y, arrow_length = 0.5, 0.5, 0.1
-ax.annotate('N', xy=(x, y), xytext=(x, y-arrow_length),
-            arrowprops=dict(facecolor='black', width=5, headwidth=15),
-            ha='center', va='center', fontsize=20,
-            xycoords=ax.transAxes)
+##inserção de norte
+#x, y, arrow_length = 0.5, 0.5, 0.1
+#ax.annotate('N', xy=(x, y), xytext=(x, y-arrow_length),
+#            arrowprops=dict(facecolor='black', width=5, headwidth=15),
+#            ha='center', va='center', fontsize=20,
+#            xycoords=ax.transAxes)
 
 
 fig.tight_layout()
