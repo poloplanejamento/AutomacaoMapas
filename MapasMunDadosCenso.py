@@ -1,9 +1,4 @@
-#!pip install geopandas -q
-#!pip install pandas -q
-#!pip install matplotlib -q              #permite personalizar opões de design
-#!pip install matplotlib.scalebar -q     #módulo da matplot específico para escala
-#!pip install contextily -q              #Importação de mapa base externo
-#!pip install mapclassify -q
+#%%
 
 import geopandas as gpd
 import pandas as pd
@@ -12,7 +7,7 @@ from matplotlib import font_manager
 from mpl_toolkits.axes_grid1 import make_axes_locatable #da escala
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, TransformedBbox #da escala
 from matplotlib_scalebar.scalebar import ScaleBar #da escala
-from sqlalchemy import true                         #
+#from sqlalchemy import true                         #
 from pandas.core.reshape.tile import Categorical    #categorização ao inves de classificação
 
 ## caso ambiente seja colab, conecta este ambiente automaticamente com a conta do google (deve ter login da Polo@gmail para funcionar)
@@ -20,14 +15,14 @@ from pandas.core.reshape.tile import Categorical    #categorização ao inves de
 #drive.mount('/content/drive')
 
 #selecionando a cidade e parâmetro desejado
-idade = "Marituba"          #coloque com acento se houver, não esqueça das aspas
+cidade = "Marituba"          #coloque com acento se houver, não esqueça das aspas
 parametro_censo = "densidade habitacional"
 
 cidade = cidade.title()                             #transforma em letras maiusculas as primeiras das palavras
 parametro_censo = parametro_censo.upper()           #transforma em letras maiusculas
 
 #tabela rascunho interna para verificação do estado ao qual a cidade pertence
-tabela1 = pd.read_csv('/content/drive/MyDrive/Tabelas/Estados.csv', sep=",", decimal=".", encoding="UTF-8")
+tabela1 = pd.read_csv('C:/Users/polop/Downloads/Tabelas/Estados.csv', sep=",", decimal=".", encoding="UTF-8")
 cid_estado = tabela1[tabela1.NM_MUN == cidade]
 cid_estado = cid_estado[["SIGLA_UF"]]
 
@@ -36,10 +31,10 @@ estado = indice_resetado.loc[0, 'SIGLA_UF']  #caso o nome da cidade seja compart
 
 #Se o Estado for SP verificar aqui se é da RMSP
 
-caminho_cidades = "/content/drive/MyDrive/Camadas/" + estado + "_mun.shp"
-caminho_setores = "/content/drive/MyDrive/Camadas/" + estado + "_setores.shp"
-caminho_tabela_setores = "/content/drive/MyDrive/Tabelas/" + estado + "_tab_setores.csv"
-caminho_tabela_raca = "/content/drive/MyDrive/Tabelas/Pessoa03_" + estado + ".csv"
+caminho_cidades = "C:/Users/polop/Downloads/Camadas/Camadas/" + estado + "_mun.shp"
+caminho_setores = "C:/Users/polop/Downloads/Camadas/Camadas/" + estado + "_setores.shp"
+caminho_tabela_setores = "C:/Users/polop/Downloads/Tabelas/" + estado + "_tab_setores.csv"
+caminho_tabela_raca = "C:/Users/polop/Downloads/Tabelas/Pessoa03_" + estado + ".csv"
 
 shape_estado_mun = gpd.read_file(caminho_cidades)
 shape_setores = gpd.read_file(caminho_setores)
@@ -51,9 +46,9 @@ shape_estado_mun =shape_estado_mun.to_crs(epsg=31983)
 shape_setores = shape_setores.to_crs(epsg=31983)
 
 #camadas base comuns a todos os mapas independente da cidade
-oceano =gpd.read_file('/content/drive/MyDrive/Camadas/Fundo_oceano.shp')
+oceano =gpd.read_file('C:/Users/polop/Downloads/Camadas/Camadas/Fundo_oceano.shp')
 oceano=oceano.to_crs(epsg=31983)
-br=gpd.read_file('/content/drive/MyDrive/Camadas/BRUFE250GC_SIR.shp')
+br=gpd.read_file('C:/Users/polop/Downloads/Camadas/Camadas/BRUFE250GC_SIR.shp')
 br=br.to_crs(epsg=31983)
 
 #importação e transformação do csv no formato padrão para fazer a união de tabelas
@@ -206,3 +201,5 @@ plt.plot()
 
 #caminho="/content/drive/MyDrive/Mapas_imersao/"+i.replace(" ", "_")+".jpeg"
 #fig.savefig((caminho), dpi=300)
+
+# %%
